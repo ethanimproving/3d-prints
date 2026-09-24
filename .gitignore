@@ -1,0 +1,26 @@
+# --- 3D print artifacts ---
+# OpenSCAD and slicer temp/cache files we don't want to commit
+*.log
+*.stl.bak
+~$*
+*.swp
+*.swo
+
+# Generated previews that are committed intentionally (images/hero.png and
+# angle renders) ARE tracked; these are only transient/cache outputs.
+*.off
+*.amf
+*.obj
+*.3mf
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.pyc
+__pycache__/
+
+# Local-only scratch
+*.tmp
+tmp-*
