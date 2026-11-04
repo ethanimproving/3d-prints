@@ -37,14 +37,16 @@ socket_d = 10;                    // keyed bridge engagement inside each hub
 key_extra_h = 3;                  // T-key captures bridge vertically
 port_clear = 0.25;                // total clearance on bridge-to-port fit
 
-glyphs = ["E", "N", "g", "E", "N", "E", "S", "I", "S"];   // "I" is a placeholder for the snake-I
+glyphs = ["FL", "E", "N", "g", "E", "N", "E", "S", "I", "S", "FR"];   // FL/FR: flame ends; "I" is a placeholder for the snake-I
 
 // ---------- Derived values ----------
 base_top = clip_roof_t + base_t;
 zc = base_top + side_wall + letter_h / 2;           // glyph and bridge mid-height
 bridge_L = letter_gap - 2 * hub_len;                // visible span between hub faces
 
-function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 135 : g == "S" ? 140 : 50;
+flame_h = 2 * letter_h;   // flames rise above and below the letters, as in the logo
+
+function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 135 : g == "S" ? 140 : (g == "FL" || g == "FR") ? 170 : 50;
 function outer_w(g) = glyph_w(g) + 2 * side_wall;
 function left_edge(i) = i == 0 ? 0 : left_edge(i - 1) + outer_w(glyphs[i - 1]) + letter_gap;
 function center_x(i) = left_edge(i) + outer_w(glyphs[i]) / 2;
@@ -117,8 +119,34 @@ module logo_s_2d() {
     }
 }
 
+// Flame end-piece from the logo: bulbous base, tongue rising to a tip on the left.
+// FR is the same flame mirrored, so the word is bracketed symmetrically.
+// Left flame outline in a unit box (x: 0..1 across, y: 0..1 up), traced from the logo.
+flame_pts = [
+    [0.6364, 1.0000], [0.5966, 0.9713], [0.5795, 0.9395], [0.5455, 0.9013], [0.4886, 0.8631],
+    [0.4545, 0.8503], [0.4034, 0.8408], [0.2614, 0.8376], [0.1534, 0.8217], [0.1080, 0.8057],
+    [0.0568, 0.7771], [0.0170, 0.7389], [0.0000, 0.6943], [0.0000, 0.6306], [0.0284, 0.5573],
+    [0.0966, 0.4968], [0.1989, 0.4236], [0.2386, 0.3790], [0.2500, 0.3503], [0.2443, 0.3248],
+    [0.2159, 0.2898], [0.0966, 0.2134], [0.0966, 0.2038], [0.1250, 0.1656], [0.1761, 0.1306],
+    [0.2443, 0.0987], [0.3295, 0.0732], [0.3182, 0.0701], [0.3920, 0.0510], [0.5057, 0.0287],
+    [0.6307, 0.0127], [0.7727, 0.0032], [0.9886, 0.0032], [0.9943, 0.0127], [0.8977, 0.0478],
+    [0.7670, 0.1242], [0.6932, 0.1879], [0.6932, 0.2038], [0.6648, 0.2420], [0.6648, 0.3089],
+    [0.6989, 0.3758], [0.7330, 0.4172], [0.7330, 0.4459], [0.6648, 0.5127], [0.6477, 0.5414],
+    [0.6477, 0.5828], [0.6989, 0.6497], [0.7784, 0.7197], [0.7784, 0.7389], [0.7443, 0.7420],
+    [0.7159, 0.7261], [0.6250, 0.6369], [0.5795, 0.6083], [0.5227, 0.5860], [0.4545, 0.5828],
+    [0.4205, 0.5924], [0.3750, 0.6178], [0.3409, 0.6561], [0.4034, 0.7484], [0.4716, 0.8057],
+    [0.5625, 0.8694], [0.6420, 0.9459], [0.6591, 0.9904], [0.6477, 1.0000]
+];
+
+module flame_2d(w, h) {
+    polygon([for (p = flame_pts) [p[0] * w, p[1] * h]]);
+}
+
 module glyph2d(g) {
-    translate([-glyph_w(g) / 2, -letter_h / 2])
+    if (g == "FL") translate([-glyph_w(g) / 2, -flame_h / 2]) flame_2d(glyph_w(g), flame_h);
+    else if (g == "FR") translate([-glyph_w(g) / 2, -flame_h / 2])
+        translate([glyph_w(g), 0]) mirror([1, 0]) flame_2d(glyph_w(g), flame_h);
+    else translate([-glyph_w(g) / 2, -letter_h / 2])
         offset(r=round_r) offset(delta=-round_r)
         if (g == "E") logo_e_2d();
         else if (g == "N") logo_n_2d();
@@ -242,6 +270,8 @@ else if (PART == "glyphs") {
         translate([-80, 0]) glyph2d("N");
         translate([80, 0]) glyph2d("g");
         translate([250, 0]) glyph2d("S");
+        translate([-400, 0]) glyph2d("FL");
+        translate([400, 0]) glyph2d("FR");
     }
 }
 else if (PART == "bridge") bridge_tube(bridge_L);
