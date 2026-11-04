@@ -46,7 +46,7 @@ bridge_L = letter_gap - 2 * hub_len;                // visible span between hub 
 
 flame_h = 2 * letter_h;   // flames rise above and below the letters, as in the logo
 
-function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 135 : g == "S" ? 140 : (g == "FL" || g == "FR") ? 170 : 50;
+function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 80 : g == "S" ? 140 : (g == "FL" || g == "FR") ? 170 : 50;
 function outer_w(g) = glyph_w(g) + 2 * side_wall;
 function left_edge(i) = i == 0 ? 0 : left_edge(i - 1) + outer_w(glyphs[i - 1]) + letter_gap;
 function center_x(i) = left_edge(i) + outer_w(glyphs[i]) / 2;
@@ -89,21 +89,27 @@ module logo_n_2d() {
     }
 }
 
-// Single-storey g in the glyph's local frame (0..letter_h): bowl above the
-// x-height line, right stem down to a descender bar that curls up on the left.
+// Single-storey g traced from the logo's lowercase g (unit box, v up).
+g_outer_pts = [
+    [0.9692, 1.0000], [0.3077, 1.0000], [0.1077, 0.9658], [0.0462, 0.9247], [0.0000, 0.7671],
+    [0.0000, 0.4863], [0.0462, 0.3630], [0.1538, 0.3082], [0.2615, 0.2945], [0.5846, 0.2877],
+    [0.6615, 0.2534], [0.6154, 0.2055], [0.5077, 0.1575], [0.3538, 0.1370], [0.1692, 0.1301],
+    [0.1692, 0.0068], [0.4154, 0.0068], [0.6154, 0.0274], [0.7846, 0.0753], [0.9385, 0.1644],
+    [0.9846, 0.3356]
+];
+g_counter_pts = [
+    [0.3846, 0.8630], [0.6154, 0.8630], [0.6462, 0.8493], [0.6462, 0.4384], [0.6154, 0.4247],
+    [0.3846, 0.4247], [0.3231, 0.4726], [0.3231, 0.8151], [0.3385, 0.8425]
+];
+
 module logo_g_2d() {
     w = glyph_w("g");
-    xh = letter_h * 0.36;
-    union() {
-        difference() {
-            translate([0, xh]) rounded_rect(w, letter_h - xh, round_r);
-            translate([stroke, xh + stroke])
-                rounded_rect(w - 2 * stroke, letter_h - xh - 2 * stroke, round_r / 2);
-        }
-        translate([w - stroke, 0]) square([stroke, letter_h]);
-        rounded_rect(w, stroke, round_r / 2);
-        square([stroke, letter_h * 0.3]);
-    }
+    n_out = len(g_outer_pts);
+    n_in = len(g_counter_pts);
+    polygon(
+        points = [for (p = concat(g_outer_pts, g_counter_pts)) [p[0] * w, p[1] * letter_h]],
+        paths = [[for (i = [0 : n_out - 1]) i], [for (i = [n_out : n_out + n_in - 1]) i]]
+    );
 }
 
 // S: bold five-bar S with squared terminals.
@@ -146,11 +152,11 @@ module glyph2d(g) {
     if (g == "FL") translate([-glyph_w(g) / 2, -flame_h / 2]) flame_2d(glyph_w(g), flame_h);
     else if (g == "FR") translate([-glyph_w(g) / 2, -flame_h / 2])
         translate([glyph_w(g), 0]) mirror([1, 0]) flame_2d(glyph_w(g), flame_h);
+    else if (g == "g") translate([-glyph_w(g) / 2, -letter_h / 2]) logo_g_2d();
     else translate([-glyph_w(g) / 2, -letter_h / 2])
         offset(r=round_r) offset(delta=-round_r)
         if (g == "E") logo_e_2d();
         else if (g == "N") logo_n_2d();
-        else if (g == "g") logo_g_2d();
         else if (g == "S") logo_s_2d();
         else rounded_rect(glyph_w(g), letter_h, round_r);
 }
