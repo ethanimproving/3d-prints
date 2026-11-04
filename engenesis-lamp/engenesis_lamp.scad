@@ -24,7 +24,7 @@ back_wall = 3;
 diffuser_t = 1.2;
 base_t = 4;
 letter_gap = 50;                  // clear distance between outer edges of neighbouring letters
-stroke = 28;                      // logo's bold, square stroke
+stroke = 36;                      // bold stroke, matching the reference's heavy letterforms
 round_r = 10;                     // small logo-style rounding on n, g and S
 
 // ---------- Bridge and ports ----------
@@ -44,7 +44,7 @@ base_top = clip_roof_t + base_t;
 zc = base_top + side_wall + letter_h / 2;           // glyph and bridge mid-height
 bridge_L = letter_gap - 2 * hub_len;                // visible span between hub faces
 
-function glyph_w(g) = g == "E" ? 120 : g == "N" ? 140 : g == "g" ? 125 : g == "S" ? 125 : 50;
+function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 135 : g == "S" ? 140 : 50;
 function outer_w(g) = glyph_w(g) + 2 * side_wall;
 function left_edge(i) = i == 0 ? 0 : left_edge(i - 1) + outer_w(glyphs[i - 1]) + letter_gap;
 function center_x(i) = left_edge(i) + outer_w(glyphs[i]) / 2;
@@ -57,53 +57,69 @@ module rounded_rect(w, h, r) {
     offset(r=r) offset(delta=-r) square([w, h]);
 }
 
+// E: solid left stem with three arms; the middle arm is slightly shorter.
 module logo_e_2d() {
-    difference() {
-        square([glyph_w("E"), letter_h]);
-        translate([stroke, stroke]) square([glyph_w("E"), letter_h - 2 * stroke]);
-        translate([stroke, letter_h / 2 - stroke / 2])
-            square([glyph_w("E") - stroke * 1.55, stroke]);
-    }
-}
-
-module logo_n_2d() {
+    w = glyph_w("E");
     union() {
         square([stroke, letter_h]);
-        translate([0, letter_h - 2 * stroke])
-            rounded_rect(glyph_w("N"), 2 * stroke, round_r);
-        translate([glyph_w("N") - stroke, 0])
-            square([stroke, letter_h - stroke]);
+        square([w, stroke]);
+        translate([0, letter_h - stroke]) square([w, stroke]);
+        translate([0, letter_h / 2 - stroke / 2]) square([w * 0.9, stroke]);
     }
 }
 
-module logo_g_2d() {
+// n: rounded-top arch with two open-bottomed legs.
+module logo_n_2d() {
+    w = glyph_w("N");
+    r = 0.38 * w;
+    ri = r - stroke;
     difference() {
-        union() {
-            rounded_rect(glyph_w("g"), letter_h * 0.72, round_r);
-            translate([glyph_w("g") - stroke, -letter_h * 0.28])
-                rounded_rect(stroke, letter_h * 0.55, round_r);
-            translate([glyph_w("g") - 2 * stroke, -letter_h * 0.28])
-                rounded_rect(2 * stroke, stroke, round_r);
+        hull() {
+            square([w, 1]);
+            translate([r, letter_h - r]) circle(r);
+            translate([w - r, letter_h - r]) circle(r);
         }
-        translate([stroke, stroke])
-            rounded_rect(glyph_w("g") - 2 * stroke, letter_h * 0.72 - 2 * stroke, round_r / 2);
+        hull() {
+            translate([stroke, -1]) square([w - 2 * stroke, 2]);
+            translate([stroke + ri, letter_h - stroke - ri]) circle(ri);
+            translate([w - stroke - ri, letter_h - stroke - ri]) circle(ri);
+        }
     }
 }
 
+// Single-storey g in the glyph's local frame (0..letter_h): bowl above the
+// x-height line, right stem down to a descender bar that curls up on the left.
+module logo_g_2d() {
+    w = glyph_w("g");
+    xh = letter_h * 0.36;
+    union() {
+        difference() {
+            translate([0, xh]) rounded_rect(w, letter_h - xh, round_r);
+            translate([stroke, xh + stroke])
+                rounded_rect(w - 2 * stroke, letter_h - xh - 2 * stroke, round_r / 2);
+        }
+        translate([w - stroke, 0]) square([stroke, letter_h]);
+        rounded_rect(w, stroke, round_r / 2);
+        square([stroke, letter_h * 0.3]);
+    }
+}
+
+// S: bold five-bar S with squared terminals.
 module logo_s_2d() {
-    difference() {
-        rounded_rect(glyph_w("S"), letter_h, round_r);
-        translate([stroke, letter_h / 2])
-            square([glyph_w("S") - stroke, letter_h / 2 - stroke]);
-        translate([0, stroke])
-            square([glyph_w("S") - stroke, letter_h / 2 - stroke]);
-        translate([stroke, letter_h / 2 - stroke / 2])
-            square([glyph_w("S") - 2 * stroke, stroke]);
+    w = glyph_w("S");
+    mid = letter_h / 2;
+    union() {
+        translate([0, letter_h - stroke]) square([w, stroke]);
+        translate([0, mid]) square([stroke, mid]);
+        translate([0, mid - stroke / 2]) square([w, stroke]);
+        translate([w - stroke, 0]) square([stroke, mid]);
+        square([w, stroke]);
     }
 }
 
 module glyph2d(g) {
     translate([-glyph_w(g) / 2, -letter_h / 2])
+        offset(r=round_r) offset(delta=-round_r)
         if (g == "E") logo_e_2d();
         else if (g == "N") logo_n_2d();
         else if (g == "g") logo_g_2d();
@@ -222,6 +238,14 @@ if (PART == "letter") {
         divider_clip();
     }
 } else if (PART == "letter_diffuser") letter_diffuser(GLYPH);
+else if (PART == "glyphs") {
+    linear_extrude(1) {
+        translate([-260, 0]) glyph2d("E");
+        translate([-80, 0]) glyph2d("N");
+        translate([80, 0]) glyph2d("g");
+        translate([250, 0]) glyph2d("S");
+    }
+}
 else if (PART == "bridge") bridge_tube(bridge_L);
 else if (PART == "bridge_diffuser") bridge_diffuser(bridge_L);
 else assembly();
