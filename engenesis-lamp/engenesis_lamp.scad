@@ -8,7 +8,7 @@ PART = "assembly";
 GLYPH = "E";                      // used when PART = "letter" or "letter_diffuser"
 
 // ---------- Divider clip ----------
-divider_t = 8.0;                  // measure your divider; about an iPhone thickness
+divider_t = 22.0;                 // measured cubicle divider thickness
 clip_clear = 0.4;                 // slide-on clearance; gap = divider_t + clip_clear
 clip_gap = divider_t + clip_clear;
 clip_leg_t = 3;
@@ -216,8 +216,6 @@ module bridge_diffuser(L) {
 
 // ---------- Assembly preview ----------
 module assembly() {
-    translate([-20, -divider_t / 2, -150])
-        color("dimgray") cube([total_w + 40, divider_t, 150]);
     for (i = [0 : len(glyphs) - 1]) {
         g = glyphs[i];
         translate([center_x(i), 0, 0]) {

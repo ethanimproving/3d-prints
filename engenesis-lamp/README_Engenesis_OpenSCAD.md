@@ -27,7 +27,7 @@ Before printing the full system, measure and update these variables near the top
 - Desired overall letter height
 - Available sign length across the desk dividers
 
-The default clip fits an 8 mm divider. Print only one short clip/bridge test first.
+The default clip fits a 22 mm divider. Print only one short clip/bridge test first.
 
 ## Suggested materials
 
