@@ -8,6 +8,7 @@ use <snake_i.scad>
 
 PART = "assembly";
 GLYPH = "E";                      // used when PART = "letter" or "letter_diffuser"
+model_scale = 0.35;               // proportional scale-down to fit a 300 mm bed and a 2-3 ft divider
 
 // ---------- Divider clip ----------
 divider_t = 22.0;                 // measured cubicle divider thickness
@@ -40,6 +41,12 @@ board_l = 52;                     // controller board footprint (assumed, Sparkl
 board_w = 28;
 board_t = 8;
 
+// ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
+pillar_d = 6;                     // octolamp corner pillar diameter
+pillar_h = 10.5;                  // octolamp pillar height: reflector standoff from the back wall
+ridge_w = 3;                      // ledge ridge width around the glyph, holds the reflector edge
+pillar_pitch = 40;                // pillar grid spacing; pillars are clipped to the glyph interior
+
 // ---------- Bridge and ports ----------
 bridge_h = 18;                    // 10 mm WS2812B strip plus margin
 flange_t = 2;
@@ -56,6 +63,9 @@ glyphs = ["FL", "E", "N", "g", "E", "N", "E", "S", "I", "S", "FR"];   // FL/FR: 
 base_top = clip_roof_t + base_t;
 zc = base_top + side_wall + letter_h / 2;           // glyph and bridge mid-height
 bridge_L = letter_gap - 2 * hub_len;                // visible span between hub faces
+back_in_y = letter_d / 2 - back_wall;               // inner face of the back wall
+seat_y = back_in_y - pillar_h;                      // pillar tops: reflector rests here
+refl_y0 = seat_y - reflector_t;                     // reflector front face
 
 flame_h = 2 * letter_h;   // flames rise above and below the letters, as in the logo
 
@@ -235,35 +245,75 @@ module controller_bay(g) {
 }
 
 // ---------- Letter ----------
+// Bridge sockets and the bridge channel, cut from the shell and from the seat supports.
+module port_cuts(g) {
+    ex = glyph_w(g) / 2 + side_wall;
+    for (s = [-1, 1])
+        scale([s, 1, 1])
+            translate([ex + hub_len - socket_d, 0, zc])
+                bridge_socket();
+    translate([-(ex + hub_len), 0, zc])
+        bridge_channel(2 * (ex + hub_len));
+}
+
+module cavity_cuts(g) {
+    // LED and diffuser cavity: the glyph outline, open to the front
+    glyph_slab(g, -letter_d / 2 - 1, back_in_y);
+    // Diffuser rebate at the front
+    glyph_slab(g, -letter_d / 2 - 1, -letter_d / 2 + diffuser_t, 0.6);
+    // LED strip groove: follows the wall so the strip sits flush inside the cavity
+    glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
+    // Charging-cable hole through the flame's back wall into the controller bay
+    if (g == "FL") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
+        rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
+}
+
+// Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
+// and a ridge lip runs around the glyph to hold the reflector edge. Pillar rows
+// skip the bridge band so the bridge channel stays clear.
+module seat_supports(g) {
+    w = glyph_w(g);
+    yc = (seat_y + back_in_y + 0.5) / 2;
+    union() {
+        translate([0, (refl_y0 + back_in_y + 0.5) / 2, zc]) rotate([90, 0, 0])
+            linear_extrude(height = back_in_y + 0.5 - refl_y0, center = true)
+                difference() {
+                    glyph2d(g);
+                    offset(delta = -ridge_w) glyph2d(g);
+                }
+        intersection() {
+            union()
+                for (x = [-w / 2 + 15 : pillar_pitch : w / 2 - 15])
+                    for (z = [-60, -30, 30, 60])
+                        translate([x, yc, zc + z]) rotate([90, 0, 0])
+                            cylinder(h = back_in_y + 0.5 - seat_y, d = pillar_d, center = true, $fn = 24);
+            glyph_slab(g, seat_y, back_in_y + 0.5, -ridge_w);
+        }
+    }
+}
+
+// ---------- Letter ----------
 module letter_shell(g) {
     ex = glyph_w(g) / 2 + side_wall;
-    difference() {
-        union() {
-            glyph_slab(g, -letter_d / 2, letter_d / 2, side_wall);
-            for (s = [-1, 1])
-                scale([s, 1, 1])
-                    translate([ex - hub_in, -letter_d / 2, zc - hub_h / 2])
-                        cube([hub_len + hub_in, letter_d, hub_h]);
-            translate([-ex, -letter_d / 2, clip_roof_t])
-                cube([2 * ex, letter_d, base_t]);
-            if (g == "FL") controller_bay(g);
+    union() {
+        difference() {
+            union() {
+                glyph_slab(g, -letter_d / 2, letter_d / 2, side_wall);
+                for (s = [-1, 1])
+                    scale([s, 1, 1])
+                        translate([ex - hub_in, -letter_d / 2, zc - hub_h / 2])
+                            cube([hub_len + hub_in, letter_d, hub_h]);
+                translate([-ex, -letter_d / 2, clip_roof_t])
+                    cube([2 * ex, letter_d, base_t]);
+                if (g == "FL") controller_bay(g);
+            }
+            cavity_cuts(g);
+            port_cuts(g);
         }
-        // LED and diffuser cavity: the glyph outline, open to the front
-        glyph_slab(g, -letter_d / 2 - 1, letter_d / 2 - back_wall);
-        // Diffuser rebate at the front
-        glyph_slab(g, -letter_d / 2 - 1, -letter_d / 2 + diffuser_t, 0.6);
-        // LED strip groove: follows the wall so the strip sits flush inside the cavity
-        glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
-        // Charging-cable hole through the flame's back wall into the controller bay
-        if (g == "FL") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
-            rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
-        // Keyed bridge ports: every letter accepts a bridge at either side.
-        for (s = [-1, 1])
-            scale([s, 1, 1])
-                translate([ex + hub_len - socket_d, 0, zc])
-                    bridge_socket();
-        translate([-(ex + hub_len), 0, zc])
-            bridge_channel(2 * (ex + hub_len));
+        difference() {
+            seat_supports(g);
+            port_cuts(g);
+        }
     }
 }
 
@@ -280,20 +330,31 @@ module snake_recess_slab(y0, y1) {
                     snake_detail_2d();
 }
 
+// The 3D snake stands proud of the diffuser front; its box coordinates map to the glyph.
+module snake_3d_on_diffuser() {
+    H = letter_h * 263 / 145;
+    translate([-glyph_w("I") / 2, -letter_d / 2, zc - letter_h / 2])
+        rotate([90, 0, 0])
+            scale([glyph_w("I") / 210, H / 340, 1])
+                snake_3d_body();
+}
+
 module letter_diffuser(g) {
-    difference() {
-        glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
-        if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+    union() {
+        difference() {
+            glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
+            if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+        }
+        if (g == "I") snake_3d_on_diffuser();
     }
 }
 
-// White reflector sits in the back of the cavity, behind the LED strip, as in the octolamp.
-// The reflector slides in from the front and rests against the back wall. The wire
-// slot at the bottom lets the LED cable leave the cavity, as in the octolamp.
+// White reflector slides in from the front and rests on the pillar tops, inside the
+// ridge lip. The wire slot at the bottom lets the LED cable leave the cavity, as in the octolamp.
 module letter_reflector(g) {
     difference() {
-        glyph_slab(g, letter_d / 2 - back_wall - reflector_t, letter_d / 2 - back_wall, -0.2);
-        if (g == "FL") translate([-4, letter_d / 2 - back_wall - reflector_t - 1, zc - letter_h / 2 - 1])
+        glyph_slab(g, refl_y0, seat_y, -ridge_w - 0.2);
+        if (g == "FL") translate([-4, refl_y0 - 1, zc - letter_h / 2 - 1])
             cube([8, reflector_t + 2, 9]);
     }
 }
@@ -332,7 +393,7 @@ module assembly() {
 }
 
 // ---------- Part selector ----------
-if (PART == "letter") {
+scale(model_scale) if (PART == "letter") {
     union() {
         letter_shell(GLYPH);
         divider_clip();

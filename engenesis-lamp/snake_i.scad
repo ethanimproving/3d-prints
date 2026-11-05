@@ -156,5 +156,55 @@ module snake_i_2d(w = 210, h = 340) {
         snake_body_2d();
 }
 
+// 3D snake: a rounded tube standing proud of the diffuser front, with an open jaw and fangs.
+// Coordinates are the 210 x 340 box (x right, y up); z is depth, positive toward the viewer.
+SNAKE_TUBE_R = 6;
+SNAKE_DEPTH = 5;      // tube centreline distance in front of the diffuser face; keeps the back clear of the reflector
+
+snake_spine = [[182, 266], [150, 262], [120, 248], [85, 232], [52, 205],
+               [32, 170], [38, 130], [60, 95], [95, 62], [130, 40], [160, 30]];
+
+module snake_ball(p, r = SNAKE_TUBE_R) {
+    translate([p[0], p[1], SNAKE_DEPTH]) sphere(r = r, $fn = 24);
+}
+
+module snake_chain(pts) {
+    for (i = [0 : len(pts) - 2])
+        hull() {
+            snake_ball(pts[i]);
+            snake_ball(pts[i + 1]);
+        }
+}
+
+// Upper and lower jaws are separate hulls; the gap between them is the open mouth.
+module snake_head_3d() {
+    // Skull
+    hull() {
+        snake_ball([158, 272], 12);
+        snake_ball([182, 280], 10);
+    }
+    // Upper jaw: skull top to snout tip
+    hull() {
+        snake_ball([170, 276], 9);
+        snake_ball([204, 290], 5);
+    }
+    // Lower jaw, dropped well below the upper jaw so the mouth reads open
+    hull() {
+        snake_ball([160, 258], 7);
+        snake_ball([200, 250], 4);
+    }
+    // Upper fangs hang down into the gap; lower fangs rise from the lower jaw
+    translate([198, 286, SNAKE_DEPTH]) rotate([180, 0, 0])
+        cylinder(h = 12, r1 = 2.4, r2 = 0.3, $fn = 12);
+    translate([194, 254, SNAKE_DEPTH]) rotate([0, 0, 0])
+        cylinder(h = 9, r1 = 2, r2 = 0.3, $fn = 12);
+}
+
+
+module snake_3d_body() {
+    snake_chain(snake_spine);
+    snake_head_3d();
+}
+
 // Preview when this file is opened directly; ignored when used by engenesis_lamp.scad.
 linear_extrude(height = 10) snake_i_2d(210, 340);
