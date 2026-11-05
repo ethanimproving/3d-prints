@@ -336,7 +336,7 @@ module snake_3d_on_diffuser() {
     translate([-glyph_w("I") / 2, -letter_d / 2, zc - letter_h / 2])
         rotate([90, 0, 0])
             scale([glyph_w("I") / 210, H / 340, 1])
-                snake_3d_body();
+                snake_3d_body(glyph_w("I") / 210 * model_scale, H / 340 * model_scale);
 }
 
 module letter_diffuser(g) {

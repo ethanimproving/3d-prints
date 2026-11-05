@@ -145,9 +145,8 @@ module snake_band(a, b, r) {
 }
 
 module snake_detail_2d() {
-    translate([177, 263]) circle(r = 6);
     snake_band([138, 248], [182, 256], 1.6);
-    for (y = [70, 125, 180])
+    for (y = [60, 90, 120, 150, 180, 210])
         snake_band([46, y], [118, y + 22], 3.2);
 }
 
@@ -159,51 +158,57 @@ module snake_i_2d(w = 210, h = 340) {
 // 3D snake: a rounded tube standing proud of the diffuser front, with an open jaw and fangs.
 // Coordinates are the 210 x 340 box (x right, y up); z is depth, positive toward the viewer.
 SNAKE_TUBE_R = 6;
-SNAKE_DEPTH = 5;      // tube centreline distance in front of the diffuser face; keeps the back clear of the reflector
 
-snake_spine = [[182, 266], [150, 262], [120, 248], [85, 232], [52, 205],
-               [32, 170], [38, 130], [60, 95], [95, 62], [130, 40], [160, 30]];
+// Spine points are [x, y, depth]. Depth swings in front of the diffuser so the body wraps the column.
+snake_spine = [[182, 262, 13], [150, 256, 11], [118, 244, 8], [85, 230, 7], [54, 204, 11],
+               [33, 170, 15], [38, 130, 10], [62, 96, 7], [96, 64, 9], [130, 42, 13], [160, 30, 10],
+               [122, 16, 12], [80, 8, 16], [44, 16, 12]];
 
-module snake_ball(p, r = SNAKE_TUBE_R) {
-    translate([p[0], p[1], SNAKE_DEPTH]) sphere(r = r, $fn = 24);
+// Sphere scaled so it stays round after the part selector's X/Z scale: wx, wz are world mm per box unit.
+module snake_ball(p, r, wx, wz) {
+    translate(p) scale([r / wx, r / wz, r]) sphere(r = 1, $fn = 24);
 }
 
-module snake_chain(pts) {
+module snake_chain(pts, wx, wz) {
     for (i = [0 : len(pts) - 2])
         hull() {
-            snake_ball(pts[i]);
-            snake_ball(pts[i + 1]);
+            snake_ball(pts[i], SNAKE_TUBE_R, wx, wz);
+            snake_ball(pts[i + 1], SNAKE_TUBE_R, wx, wz);
         }
 }
 
-// Upper and lower jaws are separate hulls; the gap between them is the open mouth.
-module snake_head_3d() {
-    // Skull
-    hull() {
-        snake_ball([158, 272], 12);
-        snake_ball([182, 280], 10);
+// Skull with an eye socket; upper and lower jaws are separate hulls, opened wide at the snout.
+module snake_head_3d(wx, wz) {
+    difference() {
+        union() {
+            hull() {
+                snake_ball([158, 274, 15], 15, wx, wz);
+                snake_ball([180, 282, 13], 12, wx, wz);
+            }
+            hull() {
+                snake_ball([166, 282, 12], 10, wx, wz);
+                snake_ball([206, 290, 9], 6, wx, wz);
+            }
+            hull() {
+                snake_ball([160, 258, 10], 9, wx, wz);
+                snake_ball([202, 250, 7], 5, wx, wz);
+            }
+            // Fangs hang from the upper jaw and rise from the lower jaw
+            translate([198, 288, 9]) rotate([90, 0, 0]) cylinder(h = 16, r1 = 3.2, r2 = 0.4, $fn = 12);
+            translate([194, 250, 8]) rotate([-90, 0, 0]) cylinder(h = 14, r1 = 3, r2 = 0.4, $fn = 12);
+            // Smaller teeth along the jaw edges
+            for (t = [[180, 280, 90], [194, 283, 90]])
+                translate([t[0], t[1], 9]) rotate([t[2], 0, 0]) cylinder(h = 5, r1 = 1.8, r2 = 0.3, $fn = 10);
+            for (t = [[180, 262, -90], [192, 256, -90]])
+                translate([t[0], t[1], 9]) rotate([t[2], 0, 0]) cylinder(h = 5, r1 = 1.8, r2 = 0.3, $fn = 10);
+        }
+        snake_ball([170, 284, 21], 4.5, wx, wz);
     }
-    // Upper jaw: skull top to snout tip
-    hull() {
-        snake_ball([170, 276], 9);
-        snake_ball([204, 290], 5);
-    }
-    // Lower jaw, dropped well below the upper jaw so the mouth reads open
-    hull() {
-        snake_ball([160, 258], 7);
-        snake_ball([200, 250], 4);
-    }
-    // Upper fangs hang down into the gap; lower fangs rise from the lower jaw
-    translate([198, 286, SNAKE_DEPTH]) rotate([180, 0, 0])
-        cylinder(h = 12, r1 = 2.4, r2 = 0.3, $fn = 12);
-    translate([194, 254, SNAKE_DEPTH]) rotate([0, 0, 0])
-        cylinder(h = 9, r1 = 2, r2 = 0.3, $fn = 12);
 }
 
-
-module snake_3d_body() {
-    snake_chain(snake_spine);
-    snake_head_3d();
+module snake_3d_body(wx = 1, wz = 1) {
+    snake_chain(snake_spine, wx, wz);
+    snake_head_3d(wx, wz);
 }
 
 // Preview when this file is opened directly; ignored when used by engenesis_lamp.scad.
