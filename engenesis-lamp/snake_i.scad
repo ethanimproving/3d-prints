@@ -131,8 +131,8 @@ module snake_mouth_2d() {
 
 // Fangs hang from the upper jaw and rise from the lower jaw, leaving a clear gap.
 module snake_fangs_2d() {
-    polygon([[185.0, 246.0], [191.0, 246.0], [188.5, 256.0]]);
-    polygon([[181.0, 284.0], [188.0, 284.0], [184.5, 270.0]]);
+    polygon([[199.0, 284.0], [205.0, 284.0], [202.0, 268.0]]);
+    polygon([[192.0, 244.0], [198.0, 244.0], [195.0, 258.0]]);
 }
 
 module snake_body_2d() {
