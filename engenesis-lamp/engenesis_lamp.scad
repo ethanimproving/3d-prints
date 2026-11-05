@@ -2,7 +2,7 @@
 // Units: mm. Viewer looks along +Y (front face is -Y). Glyphs read along +X, up is +Z.
 //
 // Export one part at a time: set PART, press F6, export STL.
-// PART values: "assembly", "letter", "letter_diffuser", "bridge", "bridge_diffuser"
+// PART values: "assembly", "letter", "letter_diffuser", "letter_reflector", "bridge", "bridge_diffuser"
 
 use <snake_i.scad>
 
@@ -24,6 +24,7 @@ letter_d = 20;                    // depth along Y (LED to diffuser path)
 side_wall = 3;
 back_wall = 3;
 diffuser_t = 1.2;
+reflector_t = 2;                  // white reflector behind the LED strip
 base_t = 4;
 letter_gap = 50;                  // clear distance between outer edges of neighbouring letters
 stroke = 36;                      // bold stroke, matching the reference's heavy letterforms
@@ -237,8 +238,29 @@ module letter_shell(g) {
     }
 }
 
+// Recesses cut into the front of the snake diffuser, mapped into glyph space.
+// Depth is 0.5 mm of the 1.2 mm diffuser so the detail shows without blocking light.
+recess_d = 0.5;
+
+module snake_recess_slab(y0, y1) {
+    H = letter_h * 263 / 145;
+    translate([0, (y0 + y1) / 2, zc]) rotate([90, 0, 0])
+        linear_extrude(height = y1 - y0, center = true)
+            translate([-glyph_w("I") / 2, -letter_h / 2])
+                scale([glyph_w("I") / 210, H / 340])
+                    snake_detail_2d();
+}
+
 module letter_diffuser(g) {
-    glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
+    difference() {
+        glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
+        if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+    }
+}
+
+// White reflector sits in the back of the cavity, behind the LED strip, as in the octolamp.
+module letter_reflector(g) {
+    glyph_slab(g, letter_d / 2 - back_wall - reflector_t, letter_d / 2 - back_wall, -0.2);
 }
 
 // ---------- Bridge ----------
@@ -265,6 +287,7 @@ module assembly() {
         translate([center_x(i), 0, 0]) {
             color("#111827") letter_shell(g);
             color([0.75, 0.9, 1, 0.85]) letter_diffuser(g);
+            color("white") letter_reflector(g);
             color("#0b5c8a") divider_clip();
         }
         if (i < len(glyphs) - 1)
@@ -280,6 +303,7 @@ if (PART == "letter") {
         divider_clip();
     }
 } else if (PART == "letter_diffuser") letter_diffuser(GLYPH);
+else if (PART == "letter_reflector") letter_reflector(GLYPH);
 else if (PART == "glyphs") {
     linear_extrude(1) {
         translate([-260, 0]) glyph2d("E");

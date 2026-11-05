@@ -119,8 +119,27 @@ snake_outline = [
     [30.1, 338.4]
 ];
 
+// Outward offset makes the snake body thicker than the traced line art.
+SNAKE_BODY_GROW = 6;
+
 module snake_body_2d() {
-    polygon(snake_outline);
+    offset(delta = SNAKE_BODY_GROW)
+        polygon(snake_outline);
+}
+
+// Diffuser recess shapes in the same 210 x 340 box: eye, jaw line and helix stripes.
+module snake_band(a, b, r) {
+    hull() {
+        translate(a) circle(r = r);
+        translate(b) circle(r = r);
+    }
+}
+
+module snake_detail_2d() {
+    translate([177, 263]) circle(r = 6);
+    snake_band([138, 248], [182, 256], 1.6);
+    for (y = [70, 125, 180])
+        snake_band([46, y], [118, y + 22], 3.2);
 }
 
 module snake_i_2d(w = 210, h = 340) {
