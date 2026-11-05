@@ -125,15 +125,16 @@ SNAKE_BODY_GROW = 6;
 // Open mouth pocket; the outward offset would otherwise close it.
 // Open gap between the jaws, running out through the front of the snout.
 module snake_mouth_2d() {
-    polygon([[164.8, 282.4], [204.4, 278.0], [206.9, 272.6], [200.8, 260.3],
-             [190.0, 254.6], [178.7, 269.5], [166.4, 279.3]]);
+    polygon([[164.8, 282.4], [204.4, 278.0], [206.9, 272.6], [200.8, 258.8],
+             [190.0, 252.6], [178.7, 268.0], [166.4, 279.3]]);
 }
 
-// Fangs left standing in the gap, separate from both jaws.
+// Fangs left standing in the gap. Upper fangs hang from the upper jaw; the
+// lower fang's base sits below the lower jaw edge so it stays attached to it.
 module snake_fangs_2d() {
-    polygon([[194.1, 278.0], [197.2, 278.0], [194.1, 266.5]]);
-    polygon([[199.2, 277.1], [202.8, 278.0], [200.2, 270.6]]);
-    polygon([[189.5, 256.2], [193.1, 260.5], [195.1, 256.2]]);
+    polygon([[194.1, 278.0], [197.2, 278.0], [194.1, 270.0]]);
+    polygon([[199.2, 277.1], [202.8, 278.0], [200.2, 273.0]]);
+    polygon([[189.5, 251.5], [193.1, 262.5], [195.1, 251.5]]);
 }
 
 module snake_body_2d() {
