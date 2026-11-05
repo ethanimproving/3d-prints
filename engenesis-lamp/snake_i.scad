@@ -75,8 +75,11 @@ SNAKE_BODY_GROW = 6;
 
 // Head traced from images/snake-trace-sheet.jpg (head detail, 3x zoom, mapped into the box).
 // Includes the open mouth gap and both fangs, so it is unioned after the body grows.
+// Scaled up about the neck anchor so the head matches the trace's head-to-column proportion.
+SNAKE_HEAD_SCALE = 1.3;
 module snake_head_2d() {
-    polygon([[106.3, 330.9], [118.7, 334.8], [135.0, 337.8], [147.1, 339.1], [159.5, 338.1],
+    translate([106.3, 330.9]) scale(SNAKE_HEAD_SCALE) translate([-106.3, -330.9])
+    polygon([[106.3, 330.9],  [118.7, 334.8], [135.0, 337.8], [147.1, 339.1], [159.5, 338.1],
              [170.9, 336.5], [180.6, 336.8], [183.9, 335.5], [186.2, 331.9], [194.3, 324.4],
              [202.5, 320.2], [207.4, 316.9], [208.7, 314.3], [207.4, 309.4], [203.5, 307.4],
              [197.3, 307.1], [196.3, 298.0], [194.7, 307.1], [190.4, 309.1], [184.6, 309.7],
