@@ -8,7 +8,7 @@ use <snake_i.scad>
 
 PART = "assembly";
 GLYPH = "E";                      // used when PART = "letter" or "letter_diffuser"
-model_scale = 0.35;               // proportional scale-down to fit a 300 mm bed and a 2-3 ft divider
+model_scale = 0.35;               // scales height and width only; thickness (Y) stays full size
 
 // ---------- Divider clip ----------
 divider_t = 22.0;                 // measured cubicle divider thickness
@@ -393,7 +393,8 @@ module assembly() {
 }
 
 // ---------- Part selector ----------
-scale(model_scale) if (PART == "letter") {
+// Scale only height (Z) and width (X); thickness (Y) stays full size so the 1.2 mm diffuser, 10 mm LED strip and divider clip keep their real dimensions.
+scale([model_scale, 1, model_scale]) if (PART == "letter") {
     union() {
         letter_shell(GLYPH);
         divider_clip();
