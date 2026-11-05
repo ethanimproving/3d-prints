@@ -134,9 +134,12 @@ module snake_fangs_2d() {
     // Upper fang: broad root inside the upper jaw, curving down to a point.
     polygon([[199.0, 292.0], [211.0, 292.0], [209.0, 276.0],
              [205.0, 267.0], [201.0, 280.0]]);
-    // Lower fang: a third of its former height, rooted in the lower jaw and pointing down.
-    polygon([[188.0, 250.0], [198.0, 250.0], [200.0, 240.0],
-             [195.0, 245.0], [191.0, 250.0]]);
+    // Lower fang: a third of its former height, rising from inside the lower jaw.
+    polygon([[188.0, 238.0], [198.0, 238.0], [197.0, 242.7],
+             [195.0, 246.0], [193.0, 242.7]]);
+    // Lower jaw pulled forward and down, so the jaw tip hangs below the flat underside.
+    polygon([[196.0, 246.0], [204.0, 246.0], [214.0, 234.0],
+             [208.0, 230.0], [196.0, 236.0]]);
 }
 
 module snake_body_2d() {
