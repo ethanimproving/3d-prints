@@ -330,22 +330,10 @@ module snake_recess_slab(y0, y1) {
                     snake_detail_2d();
 }
 
-// The 3D snake stands proud of the diffuser front; its box coordinates map to the glyph.
-module snake_3d_on_diffuser() {
-    H = letter_h * 263 / 145;
-    translate([-glyph_w("I") / 2, -letter_d / 2, zc - letter_h / 2])
-        rotate([90, 0, 0])
-            scale([glyph_w("I") / 210, H / 340, 1])
-                snake_3d_body(glyph_w("I") / 210 * model_scale, H / 340 * model_scale);
-}
-
 module letter_diffuser(g) {
-    union() {
-        difference() {
-            glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
-            if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
-        }
-        if (g == "I") snake_3d_on_diffuser();
+    difference() {
+        glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
+        if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
     }
 }
 
