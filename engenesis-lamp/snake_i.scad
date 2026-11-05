@@ -124,8 +124,7 @@ SNAKE_BODY_GROW = 6;
 
 // Open mouth pocket; the outward offset would otherwise close it.
 module snake_mouth_2d() {
-    polygon([[171, 283], [187, 277], [188, 266], [191, 259], [184, 254],
-             [181, 251], [175, 257], [171, 267]]);
+    polygon([[170, 266], [214, 296], [216, 286], [214, 250], [178, 258]]);
 }
 
 module snake_body_2d() {
