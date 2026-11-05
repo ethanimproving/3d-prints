@@ -122,9 +122,18 @@ snake_outline = [
 // Outward offset makes the snake body thicker than the traced line art.
 SNAKE_BODY_GROW = 6;
 
+// Open mouth pocket; the outward offset would otherwise close it.
+module snake_mouth_2d() {
+    polygon([[171, 283], [187, 277], [188, 266], [191, 259], [184, 254],
+             [181, 251], [175, 257], [171, 267]]);
+}
+
 module snake_body_2d() {
-    offset(delta = SNAKE_BODY_GROW)
-        polygon(snake_outline);
+    difference() {
+        offset(delta = SNAKE_BODY_GROW)
+            polygon(snake_outline);
+        snake_mouth_2d();
+    }
 }
 
 // Diffuser recess shapes in the same 210 x 340 box: eye, jaw line and helix stripes.
@@ -146,3 +155,6 @@ module snake_i_2d(w = 210, h = 340) {
     scale([w / 210, h / H_BOX])
         snake_body_2d();
 }
+
+// Preview when this file is opened directly; ignored when used by engenesis_lamp.scad.
+linear_extrude(height = 10) snake_i_2d(210, 340);
