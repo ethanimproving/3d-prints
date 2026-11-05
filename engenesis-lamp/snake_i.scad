@@ -144,10 +144,14 @@ module snake_band(a, b, r) {
     }
 }
 
+// Helix rungs: an even ladder of diagonal slots across the helix band, rising to the right
+// at about 30 degrees, as in the Inner Diffuser Outline on the Snake-I trace sheet.
 module snake_detail_2d() {
     snake_band([138, 248], [182, 256], 1.6);
-    for (y = [60, 90, 120, 150, 180, 210])
-        snake_band([46, y], [118, y + 22], 3.2);
+    for (i = [0 : 9]) {
+        y = 30 + i * 30;
+        snake_band([44, y], [150, y + 58], 2.2);
+    }
 }
 
 module snake_i_2d(w = 210, h = 340) {
