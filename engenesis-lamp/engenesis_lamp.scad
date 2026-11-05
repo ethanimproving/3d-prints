@@ -30,6 +30,16 @@ letter_gap = 50;                  // clear distance between outer edges of neigh
 stroke = 36;                      // bold stroke, matching the reference's heavy letterforms
 round_r = 10;                     // small logo-style rounding on n, g and S
 
+// ---------- Octolamp-style base features ----------
+strip_w = 10;                     // WS2812B strip width, laid along Y against the wall
+strip_t = 1.5;                    // groove depth into the wall, seats the strip flush
+strip_y0 = -8.5;                  // strip runs behind the diffuser and in front of the reflector
+cable_d = 8;                      // charging-cable hole through the flame's back wall
+bay_wall = 3;
+board_l = 52;                     // controller board footprint (assumed, Sparkle Motion Mini)
+board_w = 28;
+board_t = 8;
+
 // ---------- Bridge and ports ----------
 bridge_h = 18;                    // 10 mm WS2812B strip plus margin
 flange_t = 2;
@@ -211,6 +221,19 @@ module bridge_socket() {
     bridge_channel(socket_d + 1, port_clear);
 }
 
+// Controller bay on the back of the flame: the board drops in from below and the
+// charging cable enters through the back wall above it.
+module controller_bay(g) {
+    ex = glyph_w(g) / 2 + side_wall;
+    zb = zc - letter_h / 2;
+    difference() {
+        translate([-board_l / 2 - bay_wall, letter_d / 2, zb])
+            cube([board_l + 2 * bay_wall, board_t + bay_wall, board_w + bay_wall]);
+        translate([-board_l / 2, letter_d / 2 - 0.01, zb - 1])
+            cube([board_l, board_t, board_w + 1]);
+    }
+}
+
 // ---------- Letter ----------
 module letter_shell(g) {
     ex = glyph_w(g) / 2 + side_wall;
@@ -223,11 +246,17 @@ module letter_shell(g) {
                         cube([hub_len + hub_in, letter_d, hub_h]);
             translate([-ex, -letter_d / 2, clip_roof_t])
                 cube([2 * ex, letter_d, base_t]);
+            if (g == "FL") controller_bay(g);
         }
         // LED and diffuser cavity: the glyph outline, open to the front
         glyph_slab(g, -letter_d / 2 - 1, letter_d / 2 - back_wall);
         // Diffuser rebate at the front
         glyph_slab(g, -letter_d / 2 - 1, -letter_d / 2 + diffuser_t, 0.6);
+        // LED strip groove: follows the wall so the strip sits flush inside the cavity
+        glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
+        // Charging-cable hole through the flame's back wall into the controller bay
+        if (g == "FL") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
+            rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
         // Keyed bridge ports: every letter accepts a bridge at either side.
         for (s = [-1, 1])
             scale([s, 1, 1])
@@ -259,8 +288,14 @@ module letter_diffuser(g) {
 }
 
 // White reflector sits in the back of the cavity, behind the LED strip, as in the octolamp.
+// The reflector slides in from the front and rests against the back wall. The wire
+// slot at the bottom lets the LED cable leave the cavity, as in the octolamp.
 module letter_reflector(g) {
-    glyph_slab(g, letter_d / 2 - back_wall - reflector_t, letter_d / 2 - back_wall, -0.2);
+    difference() {
+        glyph_slab(g, letter_d / 2 - back_wall - reflector_t, letter_d / 2 - back_wall, -0.2);
+        if (g == "FL") translate([-4, letter_d / 2 - back_wall - reflector_t - 1, zc - letter_h / 2 - 1])
+            cube([8, reflector_t + 2, 9]);
+    }
 }
 
 // ---------- Bridge ----------
