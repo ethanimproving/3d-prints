@@ -126,7 +126,7 @@ SNAKE_BODY_GROW = 6;
 // Open gap between the jaws, running out through the front of the snout.
 module snake_mouth_2d() {
     polygon([[170.0, 281.0], [206.9, 276.0], [207.5, 270.0], [199.0, 252.0],
-             [188.0, 250.0], [178.0, 262.0]]);
+             [191.0, 249.0], [183.0, 249.0], [176.0, 255.0], [171.0, 266.0]]);
 }
 
 // Fangs hang from the upper jaw and rise from the lower jaw, leaving a clear gap.
