@@ -78,30 +78,22 @@ snake_outline = [
     [177.0, 244.6],
     [183.0, 240.0],
     [190.0, 235.0],
-    [197.0, 230.5],
-    [202.5, 229.0],
-    [203.5, 231.8],
-    [199.0, 235.5],
-    [192.5, 240.5],
-    [186.0, 246.0],
-    [182.5, 249.5],
-    [179.4, 260.0],
-    [177.0, 264.7],
-    [174.3, 273.4],
-    [171.7, 278.1],
-    [172.2, 282.5],
-    [177.5, 282.5],
-    [188.1, 276.2],
-    [188.6, 271.3],
-    [187.3, 264.7],
-    [188.6, 264.2],
-    [192.6, 267.1],
-    [194.7, 267.6],
-    [200.5, 274.4],
-    [203.7, 274.9],
-    [206.3, 277.0],
-    [210.0, 284.9],
-    [210.0, 288.8],
+    [197.0, 231.0],
+    [201.0, 229.5],
+    [202.0, 232.0],
+    [197.0, 238.0],
+    [191.0, 246.0],
+    [185.0, 254.0],
+    [179.0, 264.0],
+    [176.0, 272.0],
+    [177.0, 279.0],
+    [186.0, 281.5],
+    [198.0, 284.0],
+    [210.0, 287.0],
+    [218.0, 289.5],
+    [224.0, 292.0],
+    [222.0, 296.0],
+    [214.0, 297.0],
     [206.8, 292.7],
     [193.4, 303.7],
     [192.0, 308.6],
@@ -120,30 +112,20 @@ snake_outline = [
 // Outward offset makes the snake body thicker than the traced line art.
 SNAKE_BODY_GROW = 6;
 
-// Open mouth pocket; the outward offset would otherwise close it.
-// Open gap between the jaws, running out through the front of the snout.
-module snake_mouth_2d() {
-    polygon([[170.0, 281.0], [206.9, 276.0], [207.5, 270.0], [199.0, 252.0],
-             [191.0, 249.0], [183.0, 249.0], [176.0, 255.0], [171.0, 266.0]]);
-}
-
-// Fangs hang from the upper jaw and rise from the lower jaw, leaving a clear gap.
+// The mouth gap is part of snake_outline; the outward offset keeps it open at the throat.
+// Upper fang hangs from the upper jaw; three small lower teeth rise from the lower jaw's edge.
 module snake_fangs_2d() {
-    // Upper fang: broad root inside the upper jaw, curving down to a point.
     polygon([[199.0, 292.0], [211.0, 292.0], [209.0, 276.0],
              [205.0, 267.0], [201.0, 280.0]]);
-    // Lower fang: a third of its former height, rising from inside the lower jaw.
-    polygon([[188.0, 238.0], [198.0, 238.0], [197.0, 242.7],
-             [195.0, 246.0], [193.0, 242.7]]);
+    polygon([[203.4, 239.5], [200.5, 243.5], [205.9, 244.4]]);
+    polygon([[197.4, 247.5], [194.5, 251.5], [199.9, 252.4]]);
+    polygon([[191.4, 255.5], [188.5, 259.5], [194.0, 260.4]]);
 }
 
 module snake_body_2d() {
     union() {
-        difference() {
-            offset(delta = SNAKE_BODY_GROW)
-                polygon(snake_outline);
-            snake_mouth_2d();
-        }
+        offset(delta = SNAKE_BODY_GROW)
+            polygon(snake_outline);
         snake_fangs_2d();
     }
 }
