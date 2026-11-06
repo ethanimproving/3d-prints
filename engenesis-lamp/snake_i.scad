@@ -79,8 +79,8 @@ snake_outline = [
     [183.0, 240.0],
     [190.0, 235.0],
     [197.0, 231.0],
-    [201.0, 229.5],
-    [202.0, 232.0],
+    [200.0, 229.8],
+    [201.6, 231.2],
     [197.0, 238.0],
     [191.0, 246.0],
     [185.0, 254.0],
@@ -113,13 +113,10 @@ snake_outline = [
 SNAKE_BODY_GROW = 6;
 
 // The mouth gap is part of snake_outline; the outward offset keeps it open at the throat.
-// Upper fang hangs from the upper jaw; three small lower teeth rise from the lower jaw's edge.
+// Upper fang hangs from the upper jaw; the lower jaw is toothless.
 module snake_fangs_2d() {
     polygon([[199.0, 292.0], [211.0, 292.0], [209.0, 276.0],
              [205.0, 267.0], [201.0, 280.0]]);
-    polygon([[203.4, 239.5], [200.5, 243.5], [205.9, 244.4]]);
-    polygon([[197.4, 247.5], [194.5, 251.5], [199.9, 252.4]]);
-    polygon([[191.4, 255.5], [188.5, 259.5], [194.0, 260.4]]);
 }
 
 module snake_body_2d() {
