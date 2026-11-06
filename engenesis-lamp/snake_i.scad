@@ -3,6 +3,8 @@
 // neck, DNA column and base), flood-filled from the drawing's black linework
 // and mapped into a 210 x 340 box (y up).
 
+include <snake_head_ink.scad>
+
 H_BOX = 340;
 
 snake_outline = [
@@ -138,6 +140,7 @@ module snake_band(a, b, r) {
 // Helix rungs: an even ladder of diagonal slots across the helix band, rising to the right
 // at about 30 degrees, as in the Inner Diffuser Outline on the Snake-I trace sheet.
 module snake_detail_2d() {
+    snake_head_ink_2d();
     snake_band([138, 248], [182, 256], 1.6);
     for (i = [0 : 9]) {
         y = 30 + i * 30;
