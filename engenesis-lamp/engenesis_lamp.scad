@@ -330,7 +330,7 @@ module snake_recess_slab(y0, y1) {
                     snake_detail_2d();
 }
 
-module snake_head_relief_slab(y0, y1) {
+module snake_head_recess_slab(y0, y1) {
     H = letter_h * 263 / 145;
     translate([0, (y0 + y1) / 2, zc]) rotate([90, 0, 0])
         linear_extrude(height = y1 - y0, center = true)
@@ -339,13 +339,16 @@ module snake_head_relief_slab(y0, y1) {
                     snake_head_ink_2d();
 }
 
+// Diffuser stays one solid slab: the head linework is only subtracted from it,
+// so it can never print as loose islands and stays on the same part as base and reflector.
 module letter_diffuser(g) {
     difference() {
         glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
-        if (g == "I") snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+        if (g == "I") {
+            snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+            snake_head_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
+        }
     }
-    // Raised SVG head linework stands 1 mm proud of the front face.
-    if (g == "I") snake_head_relief_slab(-letter_d / 2 - 1, -letter_d / 2 + 0.01);
 }
 
 // White reflector slides in from the front and rests on the pillar tops, inside the
