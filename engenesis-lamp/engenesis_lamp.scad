@@ -5,6 +5,13 @@
 // PART values: "assembly", "letter", "letter_diffuser", "letter_reflector", "bridge", "bridge_diffuser"
 
 use <snake_i.scad>
+include <letters/glyph_params.scad>
+use <letters/E.scad>
+use <letters/N.scad>
+use <letters/g.scad>
+use <letters/S.scad>
+use <letters/I.scad>
+use <letters/flame.scad>
 
 PART = "assembly";
 GLYPH = "E";                      // used when PART = "letter" or "letter_diffuser"
@@ -20,17 +27,13 @@ clip_roof_t = 4;
 clip_w = 26;
 
 // ---------- Letter light box ----------
-letter_h = 180;                   // glyph height
-letter_d = 20;                    // depth along Y (LED to diffuser path)
+letter_d = 20;                     // depth along Y (LED to diffuser path)
 side_wall = 3;
 back_wall = 3;
 diffuser_t = 1.2;
 reflector_t = 2;                  // white reflector behind the LED strip
 base_t = 4;
 letter_gap = 50;                  // clear distance between outer edges of neighbouring letters
-stroke = 36;                      // bold stroke, matching the reference's heavy letterforms
-round_r = 10;                     // small logo-style rounding on n, g and S
-
 // ---------- Octolamp-style base features ----------
 strip_w = 10;                     // WS2812B strip width, laid along Y against the wall
 strip_t = 1.5;                    // groove depth into the wall, seats the strip flush
@@ -67,9 +70,6 @@ back_in_y = letter_d / 2 - back_wall;               // inner face of the back wa
 seat_y = back_in_y - pillar_h;                      // pillar tops: reflector rests here
 refl_y0 = seat_y - reflector_t;                     // reflector front face
 
-flame_h = 2 * letter_h;   // flames rise above and below the letters, as in the logo
-
-function glyph_w(g) = g == "E" ? 130 : g == "N" ? 140 : g == "g" ? 80 : g == "S" ? 140 : g == "I" ? 210 : (g == "FL" || g == "FR") ? 170 : 50;
 function outer_w(g) = glyph_w(g) + 2 * side_wall;
 function left_edge(i) = i == 0 ? 0 : left_edge(i - 1) + outer_w(glyphs[i - 1]) + letter_gap;
 function center_x(i) = left_edge(i) + outer_w(glyphs[i]) / 2;
@@ -80,102 +80,6 @@ total_w = left_edge(len(glyphs) - 1) + outer_w(glyphs[len(glyphs) - 1]);
 // an installed font. The I is the traced helix snake.
 module rounded_rect(w, h, r) {
     offset(r=r) offset(delta=-r) square([w, h]);
-}
-
-// E: solid left stem with three arms; the middle arm is slightly shorter.
-module logo_e_2d() {
-    w = glyph_w("E");
-    union() {
-        square([stroke, letter_h]);
-        square([w, stroke]);
-        translate([0, letter_h - stroke]) square([w, stroke]);
-        translate([0, letter_h / 2 - stroke / 2]) square([w * 0.9, stroke]);
-    }
-}
-
-// n: rounded-top arch with two open-bottomed legs.
-module logo_n_2d() {
-    w = glyph_w("N");
-    r = 0.38 * w;
-    ri = r - stroke;
-    difference() {
-        hull() {
-            square([w, 1]);
-            translate([r, letter_h - r]) circle(r);
-            translate([w - r, letter_h - r]) circle(r);
-        }
-        hull() {
-            translate([stroke, -1]) square([w - 2 * stroke, 2]);
-            translate([stroke + ri, letter_h - stroke - ri]) circle(ri);
-            translate([w - stroke - ri, letter_h - stroke - ri]) circle(ri);
-        }
-    }
-}
-
-// Single-storey g traced from the logo's lowercase g (unit box, v up).
-g_outer_pts = [
-    [0.9692, 1.0000], [0.3077, 1.0000], [0.1077, 0.9658], [0.0462, 0.9247], [0.0000, 0.7671],
-    [0.0000, 0.4863], [0.0462, 0.3630], [0.1538, 0.3082], [0.2615, 0.2945], [0.5846, 0.2877],
-    [0.6615, 0.2534], [0.6154, 0.2055], [0.5077, 0.1575], [0.3538, 0.1370], [0.1692, 0.1301],
-    [0.1692, 0.0068], [0.4154, 0.0068], [0.6154, 0.0274], [0.7846, 0.0753], [0.9385, 0.1644],
-    [0.9846, 0.3356]
-];
-g_counter_pts = [
-    [0.3846, 0.8630], [0.6154, 0.8630], [0.6462, 0.8493], [0.6462, 0.4384], [0.6154, 0.4247],
-    [0.3846, 0.4247], [0.3231, 0.4726], [0.3231, 0.8151], [0.3385, 0.8425]
-];
-
-// I: the helix snake from the Snake-I drawing (geometry in snake_i.scad), open jaws and fangs.
-// Taller than the letter band: base on the baseline, head above the cap line.
-// Height ratio is the logo's snake height (263px) over its letter height (145px).
-module logo_i_2d() {
-    snake_i_2d(glyph_w("I"), letter_h * 263 / 145);
-}
-
-module logo_g_2d() {
-    w = glyph_w("g");
-    n_out = len(g_outer_pts);
-    n_in = len(g_counter_pts);
-    polygon(
-        points = [for (p = concat(g_outer_pts, g_counter_pts)) [p[0] * w, p[1] * letter_h]],
-        paths = [[for (i = [0 : n_out - 1]) i], [for (i = [n_out : n_out + n_in - 1]) i]]
-    );
-}
-
-// S: bold five-bar S with squared terminals.
-module logo_s_2d() {
-    w = glyph_w("S");
-    mid = letter_h / 2;
-    union() {
-        translate([0, letter_h - stroke]) square([w, stroke]);
-        translate([0, mid]) square([stroke, mid]);
-        translate([0, mid - stroke / 2]) square([w, stroke]);
-        translate([w - stroke, 0]) square([stroke, mid]);
-        square([w, stroke]);
-    }
-}
-
-// Flame end-piece from the logo: bulbous base, tongue rising to a tip on the left.
-// FR is the same flame mirrored, so the word is bracketed symmetrically.
-// Left flame outline in a unit box (x: 0..1 across, y: 0..1 up), traced from the logo.
-flame_pts = [
-    [0.6364, 1.0000], [0.5966, 0.9713], [0.5795, 0.9395], [0.5455, 0.9013], [0.4886, 0.8631],
-    [0.4545, 0.8503], [0.4034, 0.8408], [0.2614, 0.8376], [0.1534, 0.8217], [0.1080, 0.8057],
-    [0.0568, 0.7771], [0.0170, 0.7389], [0.0000, 0.6943], [0.0000, 0.6306], [0.0284, 0.5573],
-    [0.0966, 0.4968], [0.1989, 0.4236], [0.2386, 0.3790], [0.2500, 0.3503], [0.2443, 0.3248],
-    [0.2159, 0.2898], [0.0966, 0.2134], [0.0966, 0.2038], [0.1250, 0.1656], [0.1761, 0.1306],
-    [0.2443, 0.0987], [0.3295, 0.0732], [0.3182, 0.0701], [0.3920, 0.0510], [0.5057, 0.0287],
-    [0.6307, 0.0127], [0.7727, 0.0032], [0.9886, 0.0032], [0.9943, 0.0127], [0.8977, 0.0478],
-    [0.7670, 0.1242], [0.6932, 0.1879], [0.6932, 0.2038], [0.6648, 0.2420], [0.6648, 0.3089],
-    [0.6989, 0.3758], [0.7330, 0.4172], [0.7330, 0.4459], [0.6648, 0.5127], [0.6477, 0.5414],
-    [0.6477, 0.5828], [0.6989, 0.6497], [0.7784, 0.7197], [0.7784, 0.7389], [0.7443, 0.7420],
-    [0.7159, 0.7261], [0.6250, 0.6369], [0.5795, 0.6083], [0.5227, 0.5860], [0.4545, 0.5828],
-    [0.4205, 0.5924], [0.3750, 0.6178], [0.3409, 0.6561], [0.4034, 0.7484], [0.4716, 0.8057],
-    [0.5625, 0.8694], [0.6420, 0.9459], [0.6591, 0.9904], [0.6477, 1.0000]
-];
-
-module flame_2d(w, h) {
-    polygon([for (p = flame_pts) [p[0] * w, p[1] * h]]);
 }
 
 module glyph2d(g) {
