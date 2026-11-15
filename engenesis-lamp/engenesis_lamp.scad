@@ -40,15 +40,15 @@ strip_y0 = -8.5;                  // strip runs behind the diffuser and in front
 board_l = 30;                     // Adafruit Sparkle Motion Mini footprint, 1.2" x 0.8"
 board_w = 20;
 tray_wall = 1.6;                  // octolamp board holder wall
-tray_in_x = board_w + 2.4;        // octolamp holder pocket 22.4 x 33.8, measured from its STL
-tray_in_y = board_l + 3.8;
-tray_h = 6;                       // wall height above the base plate
-cable_notch_w = 10;               // octolamp cable notch in the far wall
-cable_notch_h = 4;                // notch depth below the wall top
+tray_in_x = board_w + 2.4;        // holder pocket 22.4 (X) x 33.8 (Z), measured from the octolamp STL
+tray_in_z = board_l + 3.8;
+tray_h = 6;                       // holder wall depth from the back wall's inner face
+cable_notch_w = 10;               // cable notch in the holder's bottom wall
+cable_d = 8;                      // cable hole through the back wall, below the notch
 pin_d = 2.2;                      // octolamp board locating pins
 pin_h = 3;
-pin_x = 7.3;                      // pins at +/-7.3 x and +/-12.7 from the pocket centre
-pin_dy = 12.7;
+pin_x = 7.3;                      // pins at +/-7.3 in X and +/-12.7 in Z from the pocket centre
+pin_dz = 12.7;
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
 pillar_d = 6;                     // octolamp corner pillar diameter
@@ -141,22 +141,28 @@ module bridge_socket() {
     bridge_channel(socket_d + 1, port_clear);
 }
 
-// Octolamp-style board holder: an open-top pocket on the back extension of the base plate,
-// four locating pins, and a 10 mm cable notch in the far wall, as in the octolamp STL.
+// Board holder, as in the octolamp: a wall frame and four locating pins stand off the
+// inner face of the back wall, with the board lying flat inside (X 20, Z 30, USB end down).
+// The bottom wall has a notch for the cable, and a hole through the back wall sits below it.
 module controller_bay(g) {
-    y0 = letter_d / 2 - 1;
-    yi = y0 + tray_wall;
+    yb = back_in_y - tray_h;
+    zb = zc - tray_in_z / 2;
     difference() {
-        translate([-tray_in_x / 2 - tray_wall, y0, clip_roof_t])
-            cube([tray_in_x + 2 * tray_wall, tray_in_y + 2 * tray_wall, base_t + tray_h]);
-        translate([-tray_in_x / 2, yi, base_top])
-            cube([tray_in_x, tray_in_y, tray_h + 1]);
-        translate([-cable_notch_w / 2, yi + tray_in_y - 0.5, base_top + tray_h - cable_notch_h])
-            cube([cable_notch_w, tray_wall + 2, cable_notch_h + 1]);
+        translate([-tray_in_x / 2 - tray_wall, yb, zb - tray_wall])
+            cube([tray_in_x + 2 * tray_wall, tray_h + 0.5, tray_in_z + 2 * tray_wall]);
+        translate([-tray_in_x / 2, yb - 1, zb])
+            cube([tray_in_x, tray_h + 2, tray_in_z + 1]);
+        translate([-cable_notch_w / 2, yb - 1, zb - tray_wall - 1])
+            cube([cable_notch_w, tray_h + 2, tray_wall + 2]);
     }
-    for (sx = [-1, 1]) for (sy = [-1, 1])
-        translate([sx * pin_x, yi + tray_in_y / 2 + sy * pin_dy, base_top - 0.01])
-            cylinder(h = pin_h + 0.01, d = pin_d, $fn = 24);
+    for (sx = [-1, 1]) for (sz = [-1, 1])
+        translate([sx * pin_x, back_in_y - pin_h, zc + sz * pin_dz])
+            rotate([-90, 0, 0]) cylinder(h = pin_h + 0.01, d = pin_d, $fn = 24);
+}
+
+module cable_cut(g) {
+    translate([0, back_in_y - 1, zc - tray_in_z / 2 - tray_wall - cable_d / 2 - 1])
+        rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
 }
 
 // ---------- Letter ----------
@@ -217,11 +223,16 @@ module letter_shell(g) {
                             cube([hub_len + hub_in, letter_d, hub_h]);
                 translate([-ex, -letter_d / 2, clip_roof_t])
                     cube([2 * ex, letter_d, base_t]);
-                if (g == "FL" || g == "I") controller_bay(g);
             }
             cavity_cuts(g);
             port_cuts(g);
+            if (g == "FL" || g == "I") cable_cut(g);
         }
+        if (g == "FL" || g == "I")
+            intersection() {
+                controller_bay(g);
+                glyph_slab(g, back_in_y - tray_h - 1, back_in_y + 1);
+            }
         difference() {
             seat_supports(g);
             port_cuts(g);
