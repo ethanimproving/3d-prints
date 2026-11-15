@@ -8,4 +8,4 @@ module logo_i_2d() {
     snake_i_2d(glyph_w("I"), letter_h * 263 / 145);
 }
 
-logo_i_2d();  // preview when opened directly; ignored by `use`
+linear_extrude(height = 10) logo_i_2d();  // preview when opened directly; ignored by `use`
