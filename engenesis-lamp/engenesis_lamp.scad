@@ -17,8 +17,8 @@ GLYPH = "E";                      // used when PART = "letter" or "letter_diffus
 model_scale = 0.35;               // scales height and width only; thickness (Y) stays full size
 
 // ---------- Divider clip ----------
-divider_t = 22.0;                 // measured cubicle divider thickness
-clip_clear = 0.4;                 // slide-on clearance; gap = divider_t + clip_clear
+divider_t = 22.41;                // measured cubicle divider width the clip slides onto
+clip_clear = 0;                   // extra clearance on top of divider_t
 clip_gap = divider_t + clip_clear;
 clip_leg_t = 3;
 clip_leg_len = 22;
@@ -39,9 +39,9 @@ strip_t = 1.5;                    // groove depth into the wall, seats the strip
 strip_y0 = -8.5;                  // strip runs behind the diffuser and in front of the reflector
 cable_d = 8;                      // charging-cable hole through the flame's back wall
 bay_wall = 3;
-board_l = 52;                     // controller board footprint (assumed, Sparkle Motion Mini)
-board_w = 28;
-board_t = 8;
+board_l = 30;                     // Adafruit Sparkle Motion Mini footprint, 1.2" x 0.8"
+board_w = 20;
+board_t = 12;                     // board thickness incl. terminal block (estimate)
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
 pillar_d = 6;                     // octolamp corner pillar diameter
@@ -137,13 +137,13 @@ module bridge_socket() {
 // Controller bay on the back of the flame: the board drops in from below and the
 // charging cable enters through the back wall above it.
 module controller_bay(g) {
-    ex = glyph_w(g) / 2 + side_wall;
     zb = zc - letter_h / 2;
+    top = zb + board_w + bay_wall;
     difference() {
-        translate([-board_l / 2 - bay_wall, letter_d / 2, zb])
-            cube([board_l + 2 * bay_wall, board_t + bay_wall, board_w + bay_wall]);
-        translate([-board_l / 2, letter_d / 2 - 0.01, zb - 1])
-            cube([board_l, board_t, board_w + 1]);
+        translate([-board_l / 2 - bay_wall, letter_d / 2 - 1, clip_roof_t])
+            cube([board_l + 2 * bay_wall, board_t + bay_wall + 1, top - clip_roof_t]);
+        translate([-board_l / 2, letter_d / 2 - 0.01, clip_roof_t - 1])
+            cube([board_l, board_t, top - bay_wall - clip_roof_t + 1]);
     }
 }
 
@@ -208,7 +208,7 @@ module letter_shell(g) {
                             cube([hub_len + hub_in, letter_d, hub_h]);
                 translate([-ex, -letter_d / 2, clip_roof_t])
                     cube([2 * ex, letter_d, base_t]);
-                if (g == "FL") controller_bay(g);
+                if (g == "FL" || g == "I") controller_bay(g);
             }
             cavity_cuts(g);
             port_cuts(g);
