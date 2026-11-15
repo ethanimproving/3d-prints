@@ -167,7 +167,7 @@ module cavity_cuts(g) {
     // LED strip groove: follows the wall so the strip sits flush inside the cavity
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
     // Charging-cable hole through the flame's back wall into the controller bay
-    if (g == "FL") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
+    if (g == "FL" || g == "I") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
         rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
 }
 
