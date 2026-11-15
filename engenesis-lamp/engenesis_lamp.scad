@@ -43,6 +43,7 @@ tray_wall = 1.6;                  // octolamp board holder wall
 tray_in_x = board_w + 2.4;        // holder pocket 22.4 (X) x 33.8 (Z), measured from the octolamp STL
 tray_in_z = board_l + 3.8;
 board_x = -14;                         // holder X offset from the glyph centre (I base)
+board_dz = 35;                         // holder Z offset above the glyph centre (I base)
 tray_h = 6;                       // holder wall depth from the back wall's inner face
 cable_notch_w = 10;               // cable notch in the holder's bottom wall
 cable_d = 8;                      // cable hole through the back wall, below the notch
@@ -147,7 +148,8 @@ module bridge_socket() {
 // The bottom wall has a notch for the cable, and a hole through the back wall sits below it.
 module controller_bay(g) {
     yb = back_in_y - tray_h;
-    zb = zc - tray_in_z / 2;
+    zcb = zc + board_dz;
+    zb = zcb - tray_in_z / 2;
     translate([board_x, 0, 0]) {
     difference() {
         translate([-tray_in_x / 2 - tray_wall, yb, zb - tray_wall])
@@ -158,13 +160,13 @@ module controller_bay(g) {
             cube([cable_notch_w, tray_h + 2, tray_wall + 2]);
     }
     for (sx = [-1, 1]) for (sz = [-1, 1])
-        translate([sx * pin_x, back_in_y - pin_h, zc + sz * pin_dz])
+        translate([sx * pin_x, back_in_y - pin_h, zcb + sz * pin_dz])
             rotate([-90, 0, 0]) cylinder(h = pin_h + 0.01, d = pin_d, $fn = 24);
     }
 }
 
 module cable_cut(g) {
-    translate([board_x, back_in_y - 1, zc - tray_in_z / 2 - tray_wall - cable_d / 2 - 1])
+    translate([board_x, back_in_y - 1, zc + board_dz - tray_in_z / 2 - tray_wall - cable_d / 2 - 1])
         rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
 }
 
