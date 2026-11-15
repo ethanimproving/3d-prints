@@ -208,10 +208,6 @@ module seat_supports(g) {
                     for (z = g == "I" ? [-60] : [-60, -30, 30, 60])
                         translate([x, yc, zc + z]) rotate([90, 0, 0])
                             cylinder(h = back_in_y + 0.5 - seat_y, d = pillar_d, center = true, $fn = 24);
-                if (g == "I")
-                    for (x = [-w / 2 + 35 : pillar_pitch : w / 2 - 35])
-                        translate([x, yc, zc + 60]) rotate([90, 0, 0])
-                            cylinder(h = back_in_y + 0.5 - seat_y, d = pillar_d, center = true, $fn = 24);
             }
             glyph_slab(g, seat_y, back_in_y + 0.5, -ridge_w);
         }
