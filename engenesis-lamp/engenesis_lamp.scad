@@ -204,8 +204,8 @@ module seat_supports(g) {
                 }
         intersection() {
             union() {
-                for (x = g == "I" ? [] : [-w / 2 + 15 : pillar_pitch : w / 2 - 15])
-                    for (z = [-60, -30, 30, 60])
+                for (x = [-w / 2 + 15 : pillar_pitch : w / 2 - 15])
+                    for (z = g == "I" ? [-60] : [-60, -30, 30, 60])
                         translate([x, yc, zc + z]) rotate([90, 0, 0])
                             cylinder(h = back_in_y + 0.5 - seat_y, d = pillar_d, center = true, $fn = 24);
                 if (g == "I")
