@@ -8,4 +8,6 @@ module logo_i_2d() {
     snake_i_2d(glyph_w("I"), letter_h * 263 / 145);
 }
 
-linear_extrude(height = 10) logo_i_2d();  // preview when opened directly; ignored by `use`
+// Preview in the lamp's orientation: glyph in XZ, thickness along Y. Ignored by `use`.
+rotate([90, 0, 0]) linear_extrude(height = 10, center = true)
+    translate([-glyph_w("I") / 2, -letter_h / 2]) logo_i_2d();
