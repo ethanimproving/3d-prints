@@ -38,10 +38,16 @@ strip_w = 10;                     // WS2812B strip width, laid along Y against t
 strip_t = 1.5;                    // groove depth into the wall, seats the strip flush
 strip_y0 = -8.5;                  // strip runs behind the diffuser and in front of the reflector
 cable_d = 8;                      // charging-cable hole through the flame's back wall
-bay_wall = 3;
 board_l = 30;                     // Adafruit Sparkle Motion Mini footprint, 1.2" x 0.8"
 board_w = 20;
-board_t = 12;                     // board thickness incl. terminal block (estimate)
+tray_wall = 1.6;                  // octolamp mini Sparkle Motion tray wall
+tray_in_x = board_w + 2.4;        // octolamp tray pocket 22.4 x 33.8, measured from its STL
+tray_in_y = board_l + 3.8;
+tray_h = 6;                       // tray wall height above the base plate
+pin_d = 2.2;                      // octolamp board locating pins
+pin_h = 2;
+pin_x = 7.3;                      // pins at +/-7.3 x and +/-12.7 from the tray centre
+pin_dy = 12.7;
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
 pillar_d = 6;                     // octolamp corner pillar diameter
@@ -134,17 +140,20 @@ module bridge_socket() {
     bridge_channel(socket_d + 1, port_clear);
 }
 
-// Controller bay on the back of the flame: the board drops in from below and the
-// charging cable enters through the back wall above it.
+// Octolamp-style board tray: an open-top pocket on the back extension of the base plate,
+// with four locating pins. The board lies flat, and the cable hole sits in the floor.
 module controller_bay(g) {
-    zb = zc - letter_h / 2;
-    top = zb + board_w + bay_wall;
+    y0 = letter_d / 2 - 1;
+    yi = y0 + tray_wall;
     difference() {
-        translate([-board_l / 2 - bay_wall, letter_d / 2 - 1, clip_roof_t])
-            cube([board_l + 2 * bay_wall, board_t + bay_wall + 1, top - clip_roof_t]);
-        translate([-board_l / 2, letter_d / 2 - 0.01, clip_roof_t - 1])
-            cube([board_l, board_t, top - bay_wall - clip_roof_t + 1]);
+        translate([-tray_in_x / 2 - tray_wall, y0, clip_roof_t])
+            cube([tray_in_x + 2 * tray_wall, tray_in_y + 2 * tray_wall, base_t + tray_h]);
+        translate([-tray_in_x / 2, yi, base_top])
+            cube([tray_in_x, tray_in_y, tray_h + 1]);
     }
+    for (sx = [-1, 1]) for (sy = [-1, 1])
+        translate([sx * pin_x, yi + tray_in_y / 2 + sy * pin_dy, base_top - 0.01])
+            cylinder(h = pin_h + 0.01, d = pin_d, $fn = 24);
 }
 
 // ---------- Letter ----------
@@ -166,9 +175,9 @@ module cavity_cuts(g) {
     glyph_slab(g, -letter_d / 2 - 1, -letter_d / 2 + diffuser_t, 0.6);
     // LED strip groove: follows the wall so the strip sits flush inside the cavity
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
-    // Charging-cable hole through the flame's back wall into the controller bay
-    if (g == "FL" || g == "I") translate([0, letter_d / 2 - back_wall - 1, zc - letter_h / 2 + 12])
-        rotate([-90, 0, 0]) cylinder(h = back_wall + 2, d = cable_d, $fn = 32);
+    // Charging-cable hole up through the tray floor, under the board's USB end
+    if (g == "FL" || g == "I") translate([0, letter_d / 2 - 1 + tray_wall + 4, clip_roof_t - 1])
+        cylinder(h = base_t + 2, d = cable_d, $fn = 32);
 }
 
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
