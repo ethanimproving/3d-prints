@@ -4,7 +4,6 @@
 // Export one part at a time: set PART, press F6, export STL.
 // PART values: "assembly", "letter", "letter_diffuser", "letter_reflector", "bridge", "bridge_diffuser"
 
-use <snake_i.scad>
 include <letters/glyph_params.scad>
 use <letters/E.scad>
 use <letters/N.scad>
@@ -221,38 +220,8 @@ module letter_shell(g) {
     }
 }
 
-// Recesses cut into the front of the snake diffuser, mapped into glyph space.
-// Depth is 0.5 mm of the 1.2 mm diffuser so the detail shows without blocking light.
-recess_d = 0.5;
-
-module snake_recess_slab(y0, y1) {
-    H = letter_h * 263 / 145;
-    translate([0, (y0 + y1) / 2, zc]) rotate([90, 0, 0])
-        linear_extrude(height = y1 - y0, center = true)
-            translate([-glyph_w("I") / 2, -letter_h / 2])
-                scale([glyph_w("I") / 210, H / 340])
-                    snake_detail_2d();
-}
-
-module snake_head_recess_slab(y0, y1) {
-    H = letter_h * 263 / 145;
-    translate([0, (y0 + y1) / 2, zc]) rotate([90, 0, 0])
-        linear_extrude(height = y1 - y0, center = true)
-            translate([-glyph_w("I") / 2, -letter_h / 2])
-                scale([glyph_w("I") / 210, H / 340])
-                    snake_head_ink_2d();
-}
-
-// Diffuser stays one solid slab: the head linework is only subtracted from it,
-// so it can never print as loose islands and stays on the same part as base and reflector.
 module letter_diffuser(g) {
-    difference() {
-        glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
-        if (g == "I") {
-            snake_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
-            snake_head_recess_slab(-letter_d / 2 - 1, -letter_d / 2 + recess_d);
-        }
-    }
+    glyph_slab(g, -letter_d / 2, -letter_d / 2 + diffuser_t, 0.4);
 }
 
 // White reflector slides in from the front and rests on the pillar tops, inside the
