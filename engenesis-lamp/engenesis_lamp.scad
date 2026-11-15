@@ -40,14 +40,9 @@ strip_y0 = -8.5;                  // strip runs behind the diffuser and in front
 cable_d = 8;                      // charging-cable hole through the flame's back wall
 board_l = 30;                     // Adafruit Sparkle Motion Mini footprint, 1.2" x 0.8"
 board_w = 20;
-tray_wall = 1.6;                  // octolamp mini Sparkle Motion tray wall
-tray_in_x = board_w + 2.4;        // octolamp tray pocket 22.4 x 33.8, measured from its STL
+tray_in_x = board_w + 2.4;        // octolamp board pocket 22.4 x 33.8, measured from its STL
 tray_in_y = board_l + 3.8;
-tray_h = 6;                       // tray wall height above the base plate
-pin_d = 2.2;                      // octolamp board locating pins
-pin_h = 2;
-pin_x = 7.3;                      // pins at +/-7.3 x and +/-12.7 from the tray centre
-pin_dy = 12.7;
+slot_z = 14;                      // bottom of the board window on the I/FL back wall
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
 pillar_d = 6;                     // octolamp corner pillar diameter
@@ -140,22 +135,6 @@ module bridge_socket() {
     bridge_channel(socket_d + 1, port_clear);
 }
 
-// Octolamp-style board tray: an open-top pocket on the back extension of the base plate,
-// with four locating pins. The board lies flat, and the cable hole sits in the floor.
-module controller_bay(g) {
-    y0 = letter_d / 2 - 1;
-    yi = y0 + tray_wall;
-    difference() {
-        translate([-tray_in_x / 2 - tray_wall, y0, clip_roof_t])
-            cube([tray_in_x + 2 * tray_wall, tray_in_y + 2 * tray_wall, base_t + tray_h]);
-        translate([-tray_in_x / 2, yi, base_top])
-            cube([tray_in_x, tray_in_y, tray_h + 1]);
-    }
-    for (sx = [-1, 1]) for (sy = [-1, 1])
-        translate([sx * pin_x, yi + tray_in_y / 2 + sy * pin_dy, base_top - 0.01])
-            cylinder(h = pin_h + 0.01, d = pin_d, $fn = 24);
-}
-
 // ---------- Letter ----------
 // Bridge sockets and the bridge channel, cut from the shell and from the seat supports.
 module port_cuts(g) {
@@ -175,9 +154,16 @@ module cavity_cuts(g) {
     glyph_slab(g, -letter_d / 2 - 1, -letter_d / 2 + diffuser_t, 0.6);
     // LED strip groove: follows the wall so the strip sits flush inside the cavity
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
-    // Charging-cable hole up through the tray floor, under the board's USB end
-    if (g == "FL" || g == "I") translate([0, letter_d / 2 - 1 + tray_wall + 4, clip_roof_t - 1])
-        cylinder(h = base_t + 2, d = cable_d, $fn = 32);
+    if (g == "FL" || g == "I") controller_cuts();
+}
+
+// Octolamp-style control-board slot: a rectangular window through the back wall at the
+// mid-lower body, with a round cable hole below it.
+module controller_cuts() {
+    translate([-tray_in_x / 2, back_in_y - 1, slot_z])
+        cube([tray_in_x, letter_d / 2 + 1 - (back_in_y - 1), tray_in_y]);
+    translate([0, letter_d / 2 + 1, slot_z - cable_d])
+        rotate([90, 0, 0]) cylinder(h = letter_d / 2 + 1 - (back_in_y - 1) + 2, d = cable_d, $fn = 32);
 }
 
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
@@ -217,7 +203,6 @@ module letter_shell(g) {
                             cube([hub_len + hub_in, letter_d, hub_h]);
                 translate([-ex, -letter_d / 2, clip_roof_t])
                     cube([2 * ex, letter_d, base_t]);
-                if (g == "FL" || g == "I") controller_bay(g);
             }
             cavity_cuts(g);
             port_cuts(g);
