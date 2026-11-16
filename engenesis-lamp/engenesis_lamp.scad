@@ -53,6 +53,9 @@ pin_x = 7.3;                      // pins at +/-7.3 in X and +/-12.7 in Z from t
 pin_dz = 12.7;
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
+snap_n = 4;                          // diffuser snap notches along the front lip, as on the octolamp rim
+snap_len = 15;                       // notch length along X (estimate, confirm vs octolamp)
+snap_h = 2;                          // notch depth down from the glyph top (estimate, confirm vs octolamp)
 pillar_d = 6;                     // octolamp corner pillar diameter
 pillar_h = 10.5;                  // octolamp pillar height: reflector standoff from the back wall
 ridge_w = 3;                      // ledge ridge width around the glyph, holds the reflector edge
@@ -191,6 +194,14 @@ module cavity_cuts(g) {
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
 }
 
+// Snap notches in the top of the front lip, where the diffuser clips in
+module snap_cuts(g) {
+    w = glyph_w(g);
+    for (i = [0 : snap_n - 1])
+        translate([-w / 2 + (i + 0.5) * w / snap_n - snap_len / 2, -letter_d / 2 - 1, zc + letter_h / 2 - snap_h])
+            cube([snap_len, diffuser_t + 1.6, snap_h + 1]);
+}
+
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
 // and a ridge lip runs around the glyph to hold the reflector edge. Pillar rows
 // skip the bridge band so the bridge channel stays clear.
@@ -232,6 +243,7 @@ module letter_shell(g) {
             }
             cavity_cuts(g);
             port_cuts(g);
+            snap_cuts(g);
             if (g == "FL" || g == "I") cable_cut(g);
         }
         if (g == "FL" || g == "I")
