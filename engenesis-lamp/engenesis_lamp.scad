@@ -194,12 +194,12 @@ module cavity_cuts(g) {
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
 }
 
-// Snap notches in the top of the front lip, where the diffuser clips in
+// Snap holes in the front lip just below the top edge, where the diffuser clips in
 module snap_cuts(g) {
     w = glyph_w(g);
     for (i = [0 : snap_n - 1])
-        translate([-w / 2 + (i + 0.5) * w / snap_n - snap_len / 2, -letter_d / 2 - 1, zc + letter_h / 2 - snap_h])
-            cube([snap_len, diffuser_t + 1.6, snap_h + 1]);
+        translate([-w / 2 + (i + 0.5) * w / snap_n - snap_len / 2, -letter_d / 2 - 1, zc + letter_h / 2 - 2 - snap_h])
+            cube([snap_len, diffuser_t + 1.6, snap_h]);
 }
 
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
