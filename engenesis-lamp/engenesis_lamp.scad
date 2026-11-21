@@ -53,9 +53,9 @@ pin_x = 7.3;                      // pins at +/-7.3 in X and +/-12.7 in Z from t
 pin_dz = 12.7;
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
-snap_w = 26.5;                    // diffuser catch width along X: octolamp rim arc length (15 deg at r 101.5)
-snap_depth = 1.45;                // catch depth into the 3 mm wall (octolamp rim r 100.5 -> 101.95)
-snap_len = 3;                     // catch length along Y (octolamp rim height, ramp peaks at mid)
+snap_n = 4;                          // diffuser snap notches along the front lip, as on the octolamp rim
+snap_len = 15;                       // notch length along X (estimate, confirm vs octolamp)
+snap_h = 2;                          // notch depth down from the glyph top (estimate, confirm vs octolamp)
 pillar_d = 6;                     // octolamp corner pillar diameter
 pillar_h = 10.5;                  // octolamp pillar height: reflector standoff from the back wall
 ridge_w = 3;                      // ledge ridge width around the glyph, holds the reflector edge
@@ -194,14 +194,12 @@ module cavity_cuts(g) {
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
 }
 
-// Diffuser catch on the top centre ridge of the I head: a ramped pocket in the inner
-// face of the top wall, as on the octolamp rim. Its profile is a triangle in Y/Z, so the
-// diffuser edge slides over the ramp and snaps into the peak.
-module head_snap() {
-    y0 = -letter_d / 2 + diffuser_t;
-    translate([-snap_w / 2, 0, zc + letter_h / 2])
-        rotate([90, 0, 90]) linear_extrude(height = snap_w)
-            polygon([[y0, 0.5], [y0 + snap_len, 0.5], [y0 + snap_len / 2, -snap_depth]]);
+// Snap holes in the front lip just below the top edge, where the diffuser clips in
+module snap_cuts(g) {
+    w = glyph_w(g);
+    for (i = [0 : snap_n - 1])
+        translate([-w / 2 + (i + 0.5) * w / snap_n - snap_len / 2, -letter_d / 2 - 1, zc + letter_h / 2 - 2 - snap_h])
+            cube([snap_len, diffuser_t + 1.6, snap_h]);
 }
 
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
@@ -245,7 +243,7 @@ module letter_shell(g) {
             }
             cavity_cuts(g);
             port_cuts(g);
-            if (g == "I") head_snap();
+            snap_cuts(g);
             if (g == "FL" || g == "I") cable_cut(g);
         }
         if (g == "FL" || g == "I")
