@@ -54,8 +54,7 @@ pin_dz = 12.7;
 
 // ---------- Reflector seat (measured from octolamp_black_outer_mini_sparkle_motion.stl) ----------
 snap_w = 15 / model_scale;        // diffuser snap notch width along X (15 mm printed), top centre of the I head
-snap_depth = 2 / model_scale;     // notch opening height (2 mm printed)
-snap_roof = 1.5 / model_scale;    // solid roof left over the notch so the catch is enclosed (1.5 mm printed)
+snap_depth = 2 / model_scale;     // notch depth down from the head top (2 mm printed)
 pillar_d = 6;                     // octolamp corner pillar diameter
 pillar_h = 10.5;                  // octolamp pillar height: reflector standoff from the back wall
 ridge_w = 3;                      // ledge ridge width around the glyph, holds the reflector edge
@@ -194,13 +193,13 @@ module cavity_cuts(g) {
     glyph_slab(g, strip_y0, strip_y0 + strip_w, strip_t);
 }
 
-// Diffuser snap catch: an enclosed 15 x 2 mm window through the I head ridge, centred in X,
-// running across the head's Y thickness, with a roof left above it so the catch is closed on all sides.
+// Diffuser snap notch: a 15 x 2 mm slot down from the top ridge of the I head, centred in X,
+// across the head's Y thickness, matching the octolamp rim notch.
 // Top measured from the exported STL: Z 119.17 mm / model_scale (Z is scaled, Y is not).
 i_head_top = 119.1 / model_scale;
 module head_snap() {
-    translate([-snap_w / 2, -letter_d / 2 - 1, i_head_top - snap_roof - snap_depth])
-        cube([snap_w, letter_d + 2, snap_depth]);
+    translate([-snap_w / 2, -letter_d / 2 - 1, i_head_top - snap_depth])
+        cube([snap_w, letter_d + 2, snap_depth + 5]);
 }
 
 // Reflector seat: octolamp-style pillars rise from the back wall to the seat plane,
