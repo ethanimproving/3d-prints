@@ -17,8 +17,10 @@ flame_pts = [
     [0.5625, 0.8694], [0.6420, 0.9459], [0.6591, 0.9904], [0.6477, 1.0000]
 ];
 
-module flame_2d(w, h) {
-    polygon([for (p = flame_pts) [p[0] * w, p[1] * h]]);
+function flame_points(w, h) = [for (p = flame_pts) [p[0] * w, p[1] * h]];
+
+module flame_2d(w, h, pts = flame_points(w, h)) {
+    polygon(pts);
 }
 
 flame_2d(170, 2 * 180);  // preview when opened directly; ignored by `use`

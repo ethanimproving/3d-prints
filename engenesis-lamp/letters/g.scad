@@ -13,12 +13,14 @@ g_counter_pts = [
     [0.3846, 0.4247], [0.3231, 0.4726], [0.3231, 0.8151], [0.3385, 0.8425]
 ];
 
-module logo_g_2d() {
-    w = glyph_w("g");
+function logo_g_points() =
+    [for (p = concat(g_outer_pts, g_counter_pts)) [p[0] * glyph_w("g"), p[1] * letter_h]];
+
+module logo_g_2d(pts = logo_g_points()) {
     n_out = len(g_outer_pts);
     n_in = len(g_counter_pts);
     polygon(
-        points = [for (p = concat(g_outer_pts, g_counter_pts)) [p[0] * w, p[1] * letter_h]],
+        points = pts,
         paths = [[for (i = [0 : n_out - 1]) i], [for (i = [n_out : n_out + n_in - 1]) i]]
     );
 }
