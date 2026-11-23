@@ -1,0 +1,35 @@
+{
+  "name": "scad-auto-preview",
+  "displayName": "SCAD Auto Preview",
+  "description": "Opens .scad files in the OpenSCAD.js preview instead of the text editor.",
+  "version": "0.2.0",
+  "publisher": "millernest",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ethanimproving/3d-prints"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "extensionDependencies": [
+    "ouroborosproductions.openscad-js-preview"
+  ],
+  "activationEvents": [
+    "onLanguage:scad",
+    "workspaceContains:**/*.scad"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "SCAD Auto Preview",
+      "properties": {
+        "scadAutoPreview.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the OpenSCAD.js preview in place of the code when a .scad file is opened."
+        }
+      }
+    }
+  }
+}

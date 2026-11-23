@@ -63,6 +63,8 @@ Standalone Snake `I` parts can be opened and exported directly from `letters/I/`
 - `letters/I/i_reflector.scad` — internal white reflector plate
 - `letters/I/i_diffuser.scad` — front translucent diffuser face
 
+Standalone Logo-profile `E`, `g`, `n`, `S`, and end-cap flame (`FL` left flame, `FR` right flame) parts follow the same three-part layout in `letters/E/`, `letters/g/`, `letters/n/`, `letters/S/`, `letters/FL/`, and `letters/FR/` (`e_base.scad` / `g_base.scad` / `n_base.scad` / `s_base.scad` / `fl_base.scad` / `fr_base.scad`, `*_reflector.scad`, `*_diffuser.scad`). Each folder's `shape_pts.scad` holds the traced housing and diffuser silhouettes, and `lamp_core.scad` builds the parts from them.
+
 Or open `engenesis_lamp.scad`, set `PART`, and export one STL at a time.
 
 Examples:
