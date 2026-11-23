@@ -11,6 +11,7 @@ use <letters/N.scad>
 use <letters/g.scad>
 use <letters/S.scad>
 use <letters/I.scad>
+use <letters/I/i_face_grooves.scad>
 use <letters/flame.scad>
 
 PART = "assembly";
@@ -113,6 +114,7 @@ i_diff_bevel_mm = 3.00;           // 45 deg front bevel height & radial inset (f
 i_tab_w = 13.20 / model_scale;    // snap tab width along X (13.20 mm printed, from octolamp_white_inner cat-head tab)
 i_tab_y_span = 3.00;              // 45 deg V-ridge length along Y (centred on base snap groove apex)
 i_tab_protrude_mm = 1.50;         // outward protrusion from skirt face (reaches +1.00 mm into 1.37 mm base groove)
+i_face_groove_depth = 0.45;       // subtle 0.45 mm relief indentation into the 1.00 mm front diffuser face (leaves 0.55 mm solid skin)
 
 // ---------- Octolamp white_reflector cable pocket & slit (measured from octolamp_white_reflector.stl & .dxf) ----------
 // Exact CAD measurements from octolamp_white_reflector_laser.dxf:
@@ -532,6 +534,13 @@ module i_octolamp_diffuser() {
                     glyph_slab("I", y_bevel_base + i_diff_wall_mm - (k + 1) * dy_bev - 0.02, y_bevel_base + i_diff_wall_mm - k * dy_bev + 0.02, -inset_mm / model_scale);
                 }
             }
+            // Subtle front-face indentations (0.45 mm deep into the 1.00 mm front face) for the snake body coils,
+            // belly scales, head/eye details, vertical I-column rails, and DNA helix rungs
+            if (i_face_groove_depth > 0)
+                translate([0, y_front + i_face_groove_depth / 2, zc])
+                    rotate([90, 0, 0])
+                        linear_extrude(height = i_face_groove_depth + 0.2, center = true)
+                            i_face_grooves_2d();
         }
 
         // Top & bottom 45 deg V-ridge snap tabs on the outer face of the skirt (anchored 0.4 mm into skirt wall)
