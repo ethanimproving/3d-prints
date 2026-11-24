@@ -12,6 +12,8 @@ your own hardware without re-modeling from scratch.
 | Project | Description | Source |
 |---|---|---|
 | [Everyday Dose Frother Fridge Holder](everyday-dose-frother-fridge-holder/) | Magnetic fridge holder for a 33 mm milk-frother handle | OpenSCAD |
+| [Engenesis Lamp (Horizontal Divider)](engenesis-lamp/) | Modular Octolamp-engineered illuminated ENGENESIS sign with cubicle divider clips | OpenSCAD |
+| [Engenesis Lamp (Vertical Column)](engenesis-lamp-vertical/) | Vertical-stack edition with flush rear mounts and interlocking hollow bowtie LED-strip channels | OpenSCAD |
 
 ## Layout
 
